@@ -1,0 +1,76 @@
+#!/usr/bin/env python
+
+#Zduino-BIOS, the BIOS for the Zduino (A small board that uses a Z80).
+#Copyright (C) 2022 kevidryon2
+#
+#This program is free software: you can redistribute it and/or modify
+#it under the terms of the GNU Affero General Public License as published
+#by the Free Software Foundation, either version 3 of the License, or
+#(at your option) any later version.
+#
+#This program is distributed in the hope that it will be useful,
+#but WITHOUT ANY WARRANTY; without even the implied warranty of
+#MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#GNU Affero General Public License for more details.
+#
+#You should have received a copy of the GNU Affero General Public License
+#along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+
+import sys
+
+print("ZLINK Z80 linker")
+if (len(sys.argv)<3):
+    print("Usage: zlink <build-path> <zls-path>")
+    sys.exit(1)
+
+try:
+    zls = open(sys.argv[2], "r").readlines()
+except:
+    print("Unreadable file",sys.argv[2])
+    sys.exit(1)
+
+binout = open(sys.argv[1]+"/out.bin", "wb")
+
+for i in range(65536):
+    binout.write(bytes(0xff))
+
+binout.seek(0, 0)
+i = 0
+line = ""
+if not (sys.argv[2].endswith(".zls")):
+    print("File must end with ZLS")
+    exit()
+
+while (line != "DONE"):
+    line = zls[i]
+    tokens = line.split()
+    try:
+        tokens[1] = tokens[1].replace("\n", "")
+    except:
+        print("Linked succesfully!")
+        sys.exit(0)
+    try:
+        if (tokens[0] == "INCLUDE"):
+            prevsize = binout.tell()
+            print("Including",tokens[1],"at",hex(binout.tell()).replace("0x", "$"))
+            binfile = open(sys.argv[1]+"/"+tokens[1]+".bin", "r+b")
+            binout.write(binfile.read())
+            print("File size:",(binout.tell())-prevsize)
+        elif (tokens[0] == "SKIP"):
+            print("Skipping",tokens[1],"bytes")
+            binout.seek(int(tokens[1].replace("$", "0x"), 16), 1)
+        elif (tokens[0] == "GOTO"):
+            binout.seek(int(tokens[1].replace("$", "0x"), 16), 0)
+        else:
+            print("Syntax error at:\n", line, "\nSupported commands:\n\tINCLUDE\n\tGOTO\n\tSKIP\n\tEND")
+            break
+    except:
+        try:
+            print("Cannot include file",sys.argv[1]+"/"+tokens[1]+".bin","\n", line)
+            break
+        except:
+            print("Unexpected EOF")
+            break
+    tokens = line.split()
+    i = i + 1
