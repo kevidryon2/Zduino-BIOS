@@ -24,6 +24,11 @@
 ;A000-FEFF: Mirrors of WRAM
 ;FF00-FFFF: I/O
 
+;FF00: GPIO pins 0-7
+;FF01: GPIO pins 8-15
+;FF02: Serial channel 1
+;FF03: Serial channel 2
+
 ;B0-B1 BIOS
 ;B1-B4 EPROM
 ;B4-B5 WRAM
@@ -31,8 +36,8 @@
 
 Reset:
   ld sp, $9FFF ;Initialize stack at end of WRAM
-CallSetupFn:
 
+CallSetupFn:
   ;Read pointer to Setup()
   ld a, ($2000)
   ld l, a
@@ -45,4 +50,19 @@ CallSetupFn:
   jp (hl)
 
 CallLoopFn:
-  nop
+  ;Read pointer to Loop()
+  ld a, ($2002)
+  ld l, a
+  ld a, ($2003)
+  ld h, a
+
+  ld de, .loop
+.loop:
+  push de
+  jp (hl)
+
+;TODO: Implement the C Standard library (or at least parts of it)
+
+;TODO: Implement a Basic File System
+
+;TODO: Implement a library for I/O like buzzers, LCD screens, and all sorts of other stuff (but this will be in Flash)
