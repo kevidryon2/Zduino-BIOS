@@ -1,5 +1,5 @@
 INCLUDE header
-GOTO $100
+ORG $100
 INCLUDE gpio
 INCLUDE math
 INCLUDE memcpy

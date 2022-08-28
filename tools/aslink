@@ -20,8 +20,8 @@
 import sys
 
 print("ZLINK Z80 linker")
-if (len(sys.argv)<3):
-    print("Usage: zlink <build-path> <zls-path>")
+if (len(sys.argv)<4):
+    print("Usage: aslink <src-path> <zls-path> <build-path>")
     sys.exit(1)
 
 try:
@@ -30,12 +30,8 @@ except:
     print("Unreadable file",sys.argv[2])
     sys.exit(1)
 
-binout = open(sys.argv[1]+"/out.bin", "wb")
+asmout = open(sys.argv[3]+"/out.asm", "w")
 
-for i in range(65536):
-    binout.write(bytes(0xff))
-
-binout.seek(0, 0)
 i = 0
 line = ""
 if not (sys.argv[2].endswith(".zls")):
@@ -52,22 +48,17 @@ while (line != "DONE"):
         sys.exit(0)
     try:
         if (tokens[0] == "INCLUDE"):
-            prevsize = binout.tell()
-            print("Including",tokens[1],"at",hex(binout.tell()).replace("0x", "$"))
-            binfile = open(sys.argv[1]+"/"+tokens[1]+".bin", "r+b")
-            binout.write(binfile.read())
-            print("File size:",(binout.tell())-prevsize)
-        elif (tokens[0] == "SKIP"):
-            print("Skipping",tokens[1],"bytes")
-            binout.seek(int(tokens[1].replace("$", "0x"), 16), 1)
-        elif (tokens[0] == "GOTO"):
-            binout.seek(int(tokens[1].replace("$", "0x"), 16), 0)
+            print("Including",tokens[1])
+            asmfile = open(sys.argv[1]+"/"+tokens[1]+".asm", "r+b")
+            asmout.write(asmfile.read())
+        elif (tokens[0] == "ORG"):
+            asmout.write("org "+tokens[1])
         else:
             print("Syntax error at:\n", line)
             break
     except:
         try:
-            print("Cannot include file",sys.argv[1]+"/"+tokens[1]+".bin","\n", line)
+            print("Cannot include file",sys.argv[1]+"/"+tokens[1]+".asm","\n", line)
             break
         except:
             print("Unexpected EOF")

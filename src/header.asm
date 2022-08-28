@@ -26,8 +26,7 @@
 
 ;FF00: GPIO pins 0-7
 ;FF01: GPIO pins 8-15
-;FF02: Serial channel 1
-;FF03: Serial channel 2
+;FF02: USB Parallel-To-Serial I/O
 
 ;B0-B1 BIOS
 ;B1-B4 EPROM
