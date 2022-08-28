@@ -15,6 +15,7 @@ SetGPIOPin:
   sra a
   push bc
   ;TODO: fix pin 7 bug
+  call c, .setPin7
   ld c, a
   ld a, ($ff00)
   or c
@@ -27,9 +28,13 @@ SetGPIOPin:
   djnz .decLoop2
   sra a
   push bc
-  ;TODO: fix pin 7 bug
+  call c, .setPin7
   ld c, a
   ld a, ($ff00)
   or c
   ld ($ff00), a
   pop bc
+  ret
+.setPin7:
+  set 7, a
+  ret

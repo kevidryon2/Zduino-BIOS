@@ -1,5 +1,10 @@
 INCLUDE header
-GOTO $FF
+GOTO $100
 INCLUDE gpio
+INCLUDE math
+INCLUDE memcpy
+INCLUDE strings
+INCLUDE table
+
 
 DONE
